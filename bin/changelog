@@ -1,0 +1,78 @@
+#!/usr/bin/env ruby
+require 'gli'
+begin # XXX: Remove this begin/rescue before distributing your app
+require 'changelog'
+rescue LoadError
+  STDERR.puts "In development, you need to use `bundle exec bin/changelog` to run your app"
+  STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
+  STDERR.puts "Feel free to remove this message from bin/changelog now"
+  exit 64
+end
+
+include GLI::App
+
+program_desc 'Tool to generate changelog based on Parallel6 specs'
+
+version Changelog::VERSION
+
+subcommand_option_handling :normal
+arguments :strict
+
+desc 'Generate changelog and write to CHANGELOG.md (default).'
+command :generate do |c|
+  c.desc 'Git repository directory (must be absolute path). Defaults to working directory.'
+  c.default_value Dir.pwd
+  c.arg_name 'directory'
+  c.flag [:d, :dir]
+
+  c.desc 'Output destination.'
+  c.default_value 'CHANGELOG.md'
+  c.arg_name 'file'
+  c.flag [:o, :output]
+
+  c.desc 'Regexp to filter commits from git log.'
+  c.default_value '(\[+\s?+[cfbCFB]{1}+\s?+\])'
+  c.arg_name 'regexp'
+  c.flag [:f, :filter]
+
+  c.action do |global_options,options,args|
+    # Your command logic here
+    # If you have any errors, just raise them
+    # raise "that command made no sense"
+
+    Dir.chdir(options[:dir]) do
+      puts "To make sure, we are in directory: #{Dir.pwd}"
+      puts "Output destination of changelog: #{options[:output]}"
+      Changelog::Generate.run(options)
+    end
+  end
+end
+
+pre do |global,command,options,args|
+  # Pre logic here
+  # Return true to proceed; false to abort and not call the
+  # chosen command
+  # Use skips_pre before a command to skip this block
+  # on that command only
+  # true
+  abort "FATAL: Git is not installed." unless Git::Git.is_installed?
+  Dir.chdir(options[:dir]) do
+    abort "FATAL: Not a git repository." unless Git::Git.is_git_repository?
+    abort "FATAL: No commits in git repository." if Git::Git.is_empty_repository?
+    true
+  end
+end
+
+post do |global,command,options,args|
+  # Post logic here
+  # Use skips_post before a command to skip this
+  # block on that command only
+end
+
+on_error do |exception|
+  # Error logic here
+  # return false to skip default error handling
+  true
+end
+
+exit run(ARGV)
