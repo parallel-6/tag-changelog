@@ -30,10 +30,14 @@ command :generate do |c|
   c.arg_name 'file'
   c.flag [:o, :output]
 
-  c.desc 'Regexp to filter commits from git log.'
-  c.default_value '(\[+\s?+[cfbCFB]{1}+\s?+\])'
+  c.desc 'Regexp to categorize commits from git log.'
+  c.default_value '(\[+\s?+[cfbhrCFBHR]{1}+\s?+\])'
   c.arg_name 'regexp'
   c.flag [:f, :filter]
+
+  c.desc 'Only list merged pull requests. Can be disabled to list all commits.'
+  c.default_value true
+  c.switch "pull-requests-only"
 
   c.action do |global_options,options,args|
     # Your command logic here
@@ -41,7 +45,6 @@ command :generate do |c|
     # raise "that command made no sense"
 
     Dir.chdir(options[:dir]) do
-      puts "To make sure, we are in directory: #{Dir.pwd}"
       puts "Output destination of changelog: #{options[:output]}"
       Changelog::Generate.run(options)
     end

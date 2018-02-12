@@ -5,4 +5,5 @@ require 'changelog/version'
 # you just need to require this one file in your bin file
 require 'changelog/git/git'
 require 'changelog/git/tag_list'
+require 'changelog/git/tag'
 require 'changelog/generate'

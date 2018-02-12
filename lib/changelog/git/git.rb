@@ -119,8 +119,12 @@ module Git
 
     # Retrieves commit messages and filters them
     # Todo: Armor this against code injection!
-    def self.get_filtered_messages(from_commit, to_commit, filter)
-      `git log #{from_commit}..#{to_commit} -E --grep='#{filter}' --format=%b`
+    def self.get_filtered_messages(from_commit, to_commit, filter = nil)
+      if filter
+        `git log #{from_commit}..#{to_commit} -E --grep='#{filter}' --format=%b`
+      else
+        `git log #{from_commit}..#{to_commit} --oneline`
+      end
     end
 
     # Retrieves one commit message and filters it

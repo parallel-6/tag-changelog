@@ -7,29 +7,33 @@ module Changelog
 
     def initialize(options = {})
       @options = options
-      @destination = open_output_file
+      @output = open_output_file
       @tags_list = Git::TagList.new(false)
+      @filter = Regexp.new(options[:filter], true)
+      @commit_messages_filter = set_commits_filter(options)
     end
 
     def run
+      output << "# Changelog\n\n"
       tags_list.list.each_cons(2) do |current_tag, previous_tag|
-        messages = Git::Git.get_filtered_messages(previous_tag, current_tag, 'Merge pull request').split("\n")
+        messages = get_commit_messages(previous_tag, current_tag)
+        tag = Git::Tag.new(current_tag)
+        output << "## #{tag.version}" + " (#{tag.date})\n"
         categorized_messages = categorize_messages(messages, default_categories)
-        destination << "## #{current_tag}\n\n"
         categorized_messages.each do |category|
           next unless category[:messages].any?
-          destination << "#### #{category[:header]}\n\n"
+          output << "#### #{category[:header]}\n"
           category[:messages].each do |line|
-            destination << "#{line}\n"
+            output << "#{line}\n"
           end
-          destination << "\n"
+          output << "\n"
         end
       end
     end
 
     private
 
-    attr_reader :options, :destination, :tags_list
+    attr_reader :options, :output, :tags_list, :filter, :commit_messages_filter
 
     def output_file_exists?
       File.exists?(options[:output])
@@ -40,23 +44,36 @@ module Changelog
       File.open(options[:output], "w+")
     end
 
-    def categorize_messages(messages, categories)
-      messages.each do |msg|
-        categories.each do |category|
-          next unless category[:filters]
-          category[:filters].each do |ftr|
-            if msg.include?(ftr)
-              msg = msg.gsub!(ftr, category[:bullet])
-              category[:messages].push(msg) 
-            end
-          end
-        end
-      end
-      categories
+    def set_commits_filter(options)
+      options["pull-requests-only"] ? 'Merge pull request' : nil
     end
 
-    def changelog_header
-      return "## #{options[:to]}\n\n" if options[:to] == "HEAD"
+    def get_commit_messages(previous_tag, current_tag)
+      messages = Git::Git.get_filtered_messages(previous_tag,
+                                                current_tag,
+                                                commit_messages_filter).split("\n")
+      # if not filtering merged pull requests only
+      # we need to remove the commit sha (first 9 chars in each row)
+      messages = messages.map { |msg| msg[10..-1] } unless commit_messages_filter
+      messages
+    end
+
+    def categorize_messages(messages, categories)
+      uncategorized = categories.detect { |cat| cat[:header] == "Uncategorized" }
+      messages.each do |msg|
+        matching_category = categories.detect do |category|
+          next unless category[:filters]
+          category[:filters].map { |ftr| msg.include?(ftr) }.include?(true)
+        end
+        if matching_category
+          msg = msg.gsub!(filter, matching_category[:bullet])
+          matching_category[:messages].push(msg)
+        else
+          uncategorized[:messages].push("* #{msg}")
+        end
+      end
+
+      categories
     end
 
     def default_categories
@@ -77,6 +94,18 @@ module Changelog
           filters: ["[B]", "[ B ]", "[b]", "[ b ]"],
           bullet: "[B]",
           header: "Bug Fixes",
+          messages: []
+        },
+        {
+          filters: ["[H]", "[ H ]", "[h]", "[ h ]"],
+          bullet: "[H]",
+          header: "Hotfixes",
+          messages: []
+        },
+        {
+          filters: ["[R]", "[ R ]", "[r]", "[ r ]"],
+          bullet: "[R]",
+          header: "Refactored",
           messages: []
         },
         {
