@@ -1,6 +1,0 @@
-= changelog
-
-Describe your project here
-
-:include:changelog.rdoc
-
