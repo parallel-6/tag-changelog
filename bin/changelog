@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 require 'gli'
-begin # XXX: Remove this begin/rescue before distributing your app
+# begin # XXX: Remove this begin/rescue before distributing your app
 require 'changelog'
-rescue LoadError
-  STDERR.puts "In development, you need to use `bundle exec bin/changelog` to run your app"
-  STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
-  STDERR.puts "Feel free to remove this message from bin/changelog now"
-  exit 64
-end
+# rescue LoadError
+#   STDERR.puts "In development, you need to use `bundle exec bin/changelog` to run your app"
+#   STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
+#   STDERR.puts "Feel free to remove this message from bin/changelog now"
+#   exit 64
+# end
 
 include GLI::App
 
@@ -20,7 +20,12 @@ arguments :strict
 
 desc 'Generate changelog and write to CHANGELOG.md (default).'
 command :generate do |c|
-  c.desc 'Git repository directory (must be absolute path). Defaults to working directory.'
+  c.desc 'Configuration file to categorize commit messages in YML format. Must be an absolute path.'
+  c.default_value File.expand_path("../../lib/changelog/templates/config.yml", __FILE__)
+  c.arg_name 'file'
+  c.flag [:c, :config]
+
+  c.desc 'Git repository directory (must be an absolute path). Defaults to working directory.'
   c.default_value Dir.pwd
   c.arg_name 'directory'
   c.flag [:d, :dir]
@@ -35,6 +40,10 @@ command :generate do |c|
   c.arg_name 'regexp'
   c.flag [:f, :filter]
 
+  c.desc 'Group commit messages in categories (defined in configuration file).'
+  c.default_value true
+  c.switch "group"
+
   c.desc 'Only list merged pull requests. Can be disabled to list all commits.'
   c.default_value true
   c.switch "pull-requests-only"
@@ -43,9 +52,8 @@ command :generate do |c|
     # Your command logic here
     # If you have any errors, just raise them
     # raise "that command made no sense"
-
     Dir.chdir(options[:dir]) do
-      puts "Output destination of changelog: #{options[:output]}"
+      puts "Changelog will be written to: #{[options[:dir], options[:output]].join('/')}"
       Changelog::Generate.run(options)
     end
   end

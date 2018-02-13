@@ -52,7 +52,7 @@ module Git
     # @return [String]
     #   Current branch.
     def self.current_branch
-      `git branch`.rstrip
+      `git name-rev --name-only HEAD`.strip
     end
 
     # Launches the text editor that Git uses for commit messages,

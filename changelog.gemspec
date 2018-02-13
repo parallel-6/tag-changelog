@@ -3,11 +3,11 @@ require File.join([File.dirname(__FILE__),'lib','changelog','version.rb'])
 spec = Gem::Specification.new do |s| 
   s.name = 'changelog'
   s.version = Changelog::VERSION
-  s.author = 'Your Name Here'
-  s.email = 'your@email.address.com'
-  s.homepage = 'http://your.website.com'
+  s.author = 'Parallel6'
+  s.email = 'contact@parallel6.com'
+  s.homepage = 'http://clinical6.com'
   s.platform = Gem::Platform::RUBY
-  s.summary = 'A description of your project'
+  s.summary = 'Tool to generate changelog based on Parallel6 specs'
   s.files = `git ls-files`.split("
 ")
   s.require_paths << 'lib'

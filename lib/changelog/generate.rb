@@ -11,29 +11,28 @@ module Changelog
       @tags_list = Git::TagList.new(false)
       @filter = Regexp.new(options[:filter], true)
       @commit_messages_filter = set_commits_filter(options)
+      @group = options[:group]
     end
 
     def run
       output << "# Changelog\n\n"
       tags_list.list.each_cons(2) do |current_tag, previous_tag|
-        messages = get_commit_messages(previous_tag, current_tag)
         tag = Git::Tag.new(current_tag)
+        messages = get_commit_messages(previous_tag, current_tag)
         output << "## #{tag.version}" + " (#{tag.date})\n"
-        categorized_messages = categorize_messages(messages, default_categories)
-        categorized_messages.each do |category|
-          next unless category[:messages].any?
-          output << "#### #{category[:header]}\n"
-          category[:messages].each do |line|
-            output << "#{line}\n"
-          end
-          output << "\n"
-        end
+        output << messages.to_text
+        output << "\n"
       end
     end
 
     private
 
-    attr_reader :options, :output, :tags_list, :filter, :commit_messages_filter
+    attr_reader :options,
+                :output,
+                :tags_list,
+                :filter,
+                :commit_messages_filter,
+                :group
 
     def output_file_exists?
       File.exists?(options[:output])
@@ -55,64 +54,62 @@ module Changelog
       # if not filtering merged pull requests only
       # we need to remove the commit sha (first 9 chars in each row)
       messages = messages.map { |msg| msg[10..-1] } unless commit_messages_filter
-      messages
+      messages = categorize_messages(messages, build_categories) if group
+      messages = MessageList.new(messages, group)
     end
 
     def categorize_messages(messages, categories)
-      uncategorized = categories.detect { |cat| cat[:header] == "Uncategorized" }
+      uncategorized = categories.detect { |cat| cat["header"] == "Uncategorized" }
       messages.each do |msg|
         matching_category = categories.detect do |category|
-          next unless category[:filters]
-          category[:filters].map { |ftr| msg.include?(ftr) }.include?(true)
+          next unless category["filters"]
+          category["filters"].map { |ftr| msg.include?(ftr) }.include?(true)
         end
         if matching_category
-          msg = msg.gsub!(filter, matching_category[:bullet])
-          matching_category[:messages].push(msg)
+          msg = msg.gsub!(filter, matching_category["bullet"])
+          matching_category["messages"].push(msg)
         else
-          uncategorized[:messages].push("* #{msg}")
+          uncategorized["messages"].push("* #{msg}")
         end
       end
 
       categories
     end
 
-    def default_categories
-      [
-        {
-          filters: ["[F]", "[ F ]", "[f]", "[ f ]"],
-          bullet: "[F]",
-          header: "Features",
-          messages: []
-        },
-        {
-          filters: ["[C]", "[ C ]", "[c]", "[ c ]"],
-          bullet: "[C]",
-          header: "Configuration",
-          messages: []
-        },
-        {
-          filters: ["[B]", "[ B ]", "[b]", "[ b ]"],
-          bullet: "[B]",
-          header: "Bug Fixes",
-          messages: []
-        },
-        {
-          filters: ["[H]", "[ H ]", "[h]", "[ h ]"],
-          bullet: "[H]",
-          header: "Hotfixes",
-          messages: []
-        },
-        {
-          filters: ["[R]", "[ R ]", "[r]", "[ r ]"],
-          bullet: "[R]",
-          header: "Refactored",
-          messages: []
-        },
-        {
-          header: "Uncategorized",
-          messages: []
-        }
-      ]
+    def build_categories
+      categories = YAML.load_file(options[:config])
+      categories.each { |category| category["messages"] = [] }
+      categories
+    end
+
+    class MessageList
+      attr_reader :messages, :grouped
+
+      def initialize(messages = [], grouped = true)
+        @messages = messages
+        @grouped = grouped
+      end
+
+      def to_text
+        if grouped
+          messages.map do |category|
+            category["messages"].any? ? print_category(category) : nil
+          end.reject(&:nil?).join("")
+        else
+          print_lines(messages).reject(&:nil?).join("")
+        end
+      end
+
+      def print_category(category)
+        [
+          "#### #{category['header']}",
+          print_lines(category["messages"]).join(""),
+        ].join("\n")
+      end
+
+      def print_lines(lines)
+        lines.map { |line| "#{line}\n" }
+      end
     end
   end
 end

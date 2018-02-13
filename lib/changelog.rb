@@ -1,4 +1,5 @@
 require 'pry'
+require 'yaml'
 require 'changelog/version'
 
 # Add requires for other files you add to your project here, so
