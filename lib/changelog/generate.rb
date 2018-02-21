@@ -8,7 +8,7 @@ module Changelog
     def initialize(options = {})
       @options = options
       @output = open_output_file
-      @tags_list = Git::TagList.new(false)
+      @tags_list = build_tags_list(options)
       @filter = Regexp.new(options[:filter], true)
       @commit_messages_filter = set_commits_filter(options)
       @group = options[:group]
@@ -16,7 +16,7 @@ module Changelog
 
     def run
       output << "# Changelog\n\n"
-      tags_list.list.each_cons(2) do |current_tag, previous_tag|
+      tags_list.each_cons(2) do |current_tag, previous_tag|
         tag = Git::Tag.new(current_tag)
         messages = get_commit_messages(previous_tag, current_tag)
         output << "## #{tag.version}" + " (#{tag.date})\n"
@@ -41,6 +41,12 @@ module Changelog
     def open_output_file
       puts "#{options[:output]} doesn't exist in #{options[:dir]}... creating it" unless output_file_exists?
       File.open(options[:output], "w+")
+    end
+
+    def build_tags_list(options)
+      Git::TagList.new(options[:head]).list.reject do |tag|
+        tag if options[:skip].include?(tag)
+      end
     end
 
     def set_commits_filter(options)

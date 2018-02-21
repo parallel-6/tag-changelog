@@ -37,5 +37,7 @@ for a list of options you can pass to the command.
     -d, --dir=directory       - Git repository directory (must be an absolute path). Defaults to working directory. (default: current working directory)
     -f, --filter=regexp       - Regexp to categorize commits from git log. (default: (\[+\s?+[cfbhrCFBHR]{1}+\s?+\]))
     --[no-]group              - Group commit messages in categories (defined in configuration file). (default: enabled)
+    --[no-]head               - Include HEAD as a tag. Useful when new tag is not released yet (as a preview). Can be disabled. (default: enabled)
     -o, --output=file         - Output destination. (default: CHANGELOG.md)
     --[no-]pull-requests-only - Only list merged pull requests. Can be disabled to list all commits. (default: enabled)
+    -s, --skip=tag_list       - Skip tags (may be used more than once, default: none)

@@ -40,9 +40,17 @@ command :generate do |c|
   c.arg_name 'regexp'
   c.flag [:f, :filter]
 
+  c.desc 'Skip tags'
+  c.arg_name 'tag_list'
+  c.flag [:s, :skip], multiple: true
+
   c.desc 'Group commit messages in categories (defined in configuration file).'
   c.default_value true
   c.switch "group"
+
+  c.desc 'Include HEAD as a tag. Useful when new tag is not released yet (as a preview). Can be disabled.'
+  c.default_value true
+  c.switch "head"
 
   c.desc 'Only list merged pull requests. Can be disabled to list all commits.'
   c.default_value true
