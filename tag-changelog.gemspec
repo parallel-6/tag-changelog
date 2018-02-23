@@ -1,8 +1,9 @@
 # Ensure we require the local version and not one we might have installed already
-require File.join([File.dirname(__FILE__),'lib','changelog','version.rb'])
+require File.join([File.dirname(__FILE__),'lib','tag_changelog','version.rb'])
 spec = Gem::Specification.new do |s| 
-  s.name = 'changelog'
-  s.version = Changelog::VERSION
+  s.name = 'tag-changelog'
+  s.version = TagChangelog::VERSION
+  s.license = 'MIT'
   s.author = 'Parallel6'
   s.email = 'contact@parallel6.com'
   s.homepage = 'http://clinical6.com'
@@ -12,10 +13,10 @@ spec = Gem::Specification.new do |s|
 ")
   s.require_paths << 'lib'
   s.has_rdoc = true
-  s.extra_rdoc_files = ['README.rdoc','changelog.rdoc']
-  s.rdoc_options << '--title' << 'changelog' << '--main' << 'README.rdoc' << '-ri'
+  s.extra_rdoc_files = []
+  s.rdoc_options << '--title' << 'tag-changelog' << '--main' << 'README.rdoc' << '-ri'
   s.bindir = 'bin'
-  s.executables << 'changelog'
+  s.executables << 'tag-changelog'
   s.add_development_dependency('rake')
   s.add_development_dependency('rdoc')
   s.add_development_dependency('aruba')

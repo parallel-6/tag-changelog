@@ -1,5 +1,5 @@
 # A class to manipulate output destination of changelog and to write its contents.
-module Changelog
+module TagChangelog
   class Generate
     def self.run(options)
       new(options).run

@@ -1,12 +1,12 @@
-# changelog
+# tag-changelog
 
 Tool to generate changelog based on Parallel6 specs
 
 #### NAME
-    changelog - Tool to generate changelog based on Parallel6 specs
+    tag-changelog - Tool to generate changelog based on Parallel6 specs
 
 #### SYNOPSIS
-    changelog [global options] command [command options] [arguments...]
+    tag-changelog [global options] command [command options] [arguments...]
 
 #### VERSION
     0.0.1
@@ -26,7 +26,7 @@ All you need to do is cd into project's directory where you need to generate
 changelog and run:
 
 ```
-$ changelog generate
+$ tag-changelog generate
 ```
 
 This will execute the `generate` command with the default params. Please see below

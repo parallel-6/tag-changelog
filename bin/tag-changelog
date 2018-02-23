@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'gli'
 # begin # XXX: Remove this begin/rescue before distributing your app
-require 'changelog'
+require 'tag_changelog'
 # rescue LoadError
 #   STDERR.puts "In development, you need to use `bundle exec bin/changelog` to run your app"
 #   STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
@@ -13,7 +13,7 @@ include GLI::App
 
 program_desc 'Tool to generate changelog based on Parallel6 specs'
 
-version Changelog::VERSION
+version TagChangelog::VERSION
 
 subcommand_option_handling :normal
 arguments :strict
@@ -21,7 +21,7 @@ arguments :strict
 desc 'Generate changelog and write to CHANGELOG.md (default).'
 command :generate do |c|
   c.desc 'Configuration file to categorize commit messages in YML format. Must be an absolute path.'
-  c.default_value File.expand_path("../../lib/changelog/templates/config.yml", __FILE__)
+  c.default_value File.expand_path("../../lib/tag_changelog/templates/config.yml", __FILE__)
   c.arg_name 'file'
   c.flag [:c, :config]
 
@@ -62,7 +62,7 @@ command :generate do |c|
     # raise "that command made no sense"
     Dir.chdir(options[:dir]) do
       puts "Changelog will be written to: #{[options[:dir], options[:output]].join('/')}"
-      Changelog::Generate.run(options)
+      TagChangelog::Generate.run(options)
     end
   end
 end

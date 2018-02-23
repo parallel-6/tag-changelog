@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    changelog (0.0.1)
+    tag-changelog (0.1.0)
       gli (= 2.17.1)
 
 GEM
@@ -59,10 +59,10 @@ PLATFORMS
 
 DEPENDENCIES
   aruba
-  changelog!
   pry
   rake
   rdoc
+  tag-changelog!
 
 BUNDLED WITH
    1.13.6
