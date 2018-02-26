@@ -75,7 +75,7 @@ module TagChangelog
           msg = msg.gsub!(filter, matching_category["bullet"])
           matching_category["messages"].push(msg)
         else
-          uncategorized["messages"].push("* #{msg}")
+          uncategorized["messages"].push("#{msg}")
         end
       end
 
@@ -114,7 +114,7 @@ module TagChangelog
       end
 
       def print_lines(lines)
-        lines.map { |line| "#{line}\n" }
+        lines.map { |line| "* #{line}\n" }
       end
     end
   end
