@@ -1,15 +1,15 @@
 # tag-changelog
 
-Tool to generate changelog based on Parallel6 specs
+Tool to generate changelog based on Parallel6 specs, reading from git history.
 
 #### NAME
-    tag-changelog - Tool to generate changelog based on Parallel6 specs
+    tag-changelog - Tool to generate changelog based on git history.
 
 #### SYNOPSIS
     tag-changelog [global options] command [command options] [arguments...]
 
 #### VERSION
-    0.0.1
+    1.0.0
 
 #### GLOBAL OPTIONS
     --help    - Show this message
@@ -19,6 +19,11 @@ Tool to generate changelog based on Parallel6 specs
     generate - Generate changelog and write to CHANGELOG.md (default).
     help     - Shows a list of commands or help for one command
 
+## Installation
+
+```
+$ gem install tag-changelog
+```
 
 ## Usage
 
@@ -29,15 +34,17 @@ changelog and run:
 $ tag-changelog generate
 ```
 
-This will execute the `generate` command with the default params. Please see below
-for a list of options you can pass to the command.
+This will execute the `generate` command with the default params.
+Please see below for a list of options you can pass to the command.
 
 #### generate command options
-    -c, --config=file         - Configuration file to categorize commit messages in YML format. Must be an absolute path. (default: gem's own config.yml)
     -d, --dir=directory       - Git repository directory (must be an absolute path). Defaults to working directory. (default: current working directory)
-    -f, --filter=regexp       - Regexp to categorize commits from git log. (default: (\[+\s?+[cfbhrCFBHR]{1}+\s?+\]))
-    --[no-]group              - Group commit messages in categories (defined in configuration file). (default: enabled)
-    --[no-]head               - Include HEAD as a tag. Useful when new tag is not released yet (as a preview). Can be disabled. (default: enabled)
     -o, --output=file         - Output destination. (default: CHANGELOG.md)
-    --[no-]pull-requests-only - Only list merged pull requests. Can be disabled to list all commits. (default: enabled)
-    -s, --skip=tag_list       - Skip tags (may be used more than once, default: none)
+
+
+## Customizing your changelog
+All you need to do is to create a `.tag_changelog.yml` file in the root of the
+git repository directory to override the default configuration from this gem.
+
+Please take a look at the [default configuration yml file here](lib/tag_changelog/templates/config.yml) to learn more about the available options. You do not need to add all keys in your
+custom `yml` file, only those you're interested in overriding.

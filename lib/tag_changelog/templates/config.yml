@@ -1,37 +1,59 @@
-- bullet: "[F]"
-  filters:
-    - "[F]"
-    - "[ F ]"
-    - "[f]"
-    - "[ f ]"
-  header: "Features"
-- bullet: "[C]"
-  filters:
-    - "[C]"
-    - "[ C ]"
-    - "[c]"
-    - "[ c ]"
-  header: "Configuration"
-- bullet: "[B]"
-  filters:
-    - "[B]"
-    - "[ B ]"
-    - "[b]"
-    - "[ b ]"
-  header: "Bug Fixes"
-- bullet: "[H]"
-  filters:
-    - "[H]"
-    - "[ H ]"
-    - "[h]"
-    - "[ h ]"
-  header: "Hotfixes"
-- bullet: "[R]"
-  filters:
-    - "[R]"
-    - "[ R ]"
-    - "[r]"
-    - "[ r ]"
-  header: "Refactored"
-- bullet: "[U]"
-  header: "Uncategorized"
+filter: '(\[+\s?+[cfbhrCFBHR]{1}+\s?+\])'
+# Group commit messages in categories
+# (default: enabled)
+group: true
+# Include HEAD as a tag.
+# Useful when new tag is not released yet (as a preview).
+# (default: enabled)
+head: true
+# Output destination.
+output: CHANGELOG.md
+# Only list merged pull requests.
+# Can be disabled to list all commits.
+# (default: enabled)
+"pull-requests-only": true
+# Skip tags.
+# Add tag names not to list in the changelog output.
+skip:
+  - 
+# How to categorize/group commit messages.
+# An entry must include: :bullet, :header and can optionally include :filters
+# :bullet String to add to commit message
+# :header String used as header to list all matching messages
+# :filters Array of Strings used to match agains commit messages
+categories:
+  - bullet: "[F]"
+    filters:
+      - "[F]"
+      - "[ F ]"
+      - "[f]"
+      - "[ f ]"
+    header: "Features"
+  - bullet: "[C]"
+    filters:
+      - "[C]"
+      - "[ C ]"
+      - "[c]"
+      - "[ c ]"
+    header: "Configuration"
+  - bullet: "[B]"
+    filters:
+      - "[B]"
+      - "[ B ]"
+      - "[b]"
+      - "[ b ]"
+    header: "Bug Fixes"
+  - bullet: "[H]"
+    filters:
+      - "[H]"
+      - "[ H ]"
+      - "[h]"
+      - "[ h ]"
+    header: "Hotfixes"
+  - bullet: "[R]"
+    filters:
+      - "[R]"
+      - "[ R ]"
+      - "[r]"
+      - "[ r ]"
+    header: "Refactored"

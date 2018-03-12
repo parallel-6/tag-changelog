@@ -1,17 +1,19 @@
 # A class to manipulate output destination of changelog and to write its contents.
 module TagChangelog
   class Generate
-    def self.run(options)
-      new(options).run
+    def self.run(project_config, options)
+      new(project_config, options).run
     end
 
-    def initialize(options = {})
+    def initialize(project_config = {}, options = {})
+      @project_config = project_config
       @options = options
+      @config = build_configuration
       @output = open_output_file
-      @tags_list = build_tags_list(options)
-      @filter = Regexp.new(options[:filter], true)
-      @commit_messages_filter = set_commits_filter(options)
-      @group = options[:group]
+      @tags_list = build_tags_list
+      @filter = Regexp.new(config["filter"], true)
+      @commit_messages_filter = set_commits_filter
+      @group = config["group"]
     end
 
     def run
@@ -32,25 +34,36 @@ module TagChangelog
                 :tags_list,
                 :filter,
                 :commit_messages_filter,
-                :group
+                :group,
+                :config
+
+    def build_configuration
+      default_config
+        .merge(@project_config)
+        .merge(@options.delete_if { |_, v| v.nil? })
+    end
+
+    def default_config
+      YAML.load_file(@project_config["config_file"])
+    end
 
     def output_file_exists?
-      File.exists?(options[:output])
+      File.exists?(config["output"])
     end
 
     def open_output_file
-      puts "#{options[:output]} doesn't exist in #{options[:dir]}... creating it" unless output_file_exists?
-      File.open(options[:output], "w+")
+      puts "#{config['output']} doesn't exist in #{options[:dir]}... creating it" unless output_file_exists?
+      File.open(config["output"], "w+")
     end
 
-    def build_tags_list(options)
-      Git::TagList.new(options[:head]).list.reject do |tag|
-        tag if options[:skip].include?(tag)
+    def build_tags_list
+      Git::TagList.new(config["head"]).list.reject do |tag|
+        tag if config["skip"].include?(tag)
       end
     end
 
-    def set_commits_filter(options)
-      options["pull-requests-only"] ? 'Merge pull request' : nil
+    def set_commits_filter
+      config["pull-requests-only"] ? 'Merge pull request' : nil
     end
 
     def get_commit_messages(previous_tag, current_tag)
@@ -58,8 +71,8 @@ module TagChangelog
                                                 current_tag,
                                                 commit_messages_filter).split("\n")
       # if not filtering merged pull requests only
-      # we need to remove the commit sha (first 9 chars in each row)
-      messages = messages.map { |msg| msg[10..-1] } unless commit_messages_filter
+      # we need to remove the commit sha1
+      messages = messages.map { |msg| msg.split(" ")[1..-1].join(" ") } unless commit_messages_filter
       messages = categorize_messages(messages, build_categories) if group
       messages = MessageList.new(messages, group)
     end
@@ -75,7 +88,7 @@ module TagChangelog
           msg = msg.gsub!(filter, matching_category["bullet"])
           matching_category["messages"].push(msg)
         else
-          uncategorized["messages"].push("* #{msg}")
+          uncategorized["messages"].push("#{msg}")
         end
       end
 
@@ -83,39 +96,10 @@ module TagChangelog
     end
 
     def build_categories
-      categories = YAML.load_file(options[:config])
+      categories = config["categories"].dup
+      categories.push({ "bullet" => "[U]", "header" => "Uncategorized" })
       categories.each { |category| category["messages"] = [] }
       categories
-    end
-
-    class MessageList
-      attr_reader :messages, :grouped
-
-      def initialize(messages = [], grouped = true)
-        @messages = messages
-        @grouped = grouped
-      end
-
-      def to_text
-        if grouped
-          messages.map do |category|
-            category["messages"].any? ? print_category(category) : nil
-          end.reject(&:nil?).join("")
-        else
-          print_lines(messages).reject(&:nil?).join("")
-        end
-      end
-
-      def print_category(category)
-        [
-          "#### #{category['header']}",
-          print_lines(category["messages"]).join(""),
-        ].join("\n")
-      end
-
-      def print_lines(lines)
-        lines.map { |line| "#{line}\n" }
-      end
     end
   end
 end
