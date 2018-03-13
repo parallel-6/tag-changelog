@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    tag-changelog (0.1.0)
+    tag-changelog (1.0.0)
       gli (= 2.17.1)
 
 GEM
